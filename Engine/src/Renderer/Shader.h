@@ -20,22 +20,22 @@ public:
     Shader(Shader&& other) noexcept;
     Shader& operator=(Shader&& other) noexcept;
 
-    void bind() const;
+    void Bind() const;
 
     // Uniform setters bind the shader. Unknown uniform names are ignored,
     // matching OpenGL's behavior for location -1.
-    void setInt(const std::string& name, int value) const;
-    void setFloat(const std::string& name, float value) const;
-    void setVec2(const std::string& name, const glm::vec2& value) const;
-    void setVec3(const std::string& name, const glm::vec3& value) const;
-    void setVec4(const std::string& name, const glm::vec4& value) const;
-    void setMat4(const std::string& name, const glm::mat4& value) const;
+    void SetInt(const std::string& name, int value) const;
+    void SetFloat(const std::string& name, float value) const;
+    void SetVec2(const std::string& name, const glm::vec2& value) const;
+    void SetVec3(const std::string& name, const glm::vec3& value) const;
+    void SetVec4(const std::string& name, const glm::vec4& value) const;
+    void SetMat4(const std::string& name, const glm::mat4& value) const;
 
-    unsigned int id() const { return program_; }
+    unsigned int Id() const { return m_program; }
 
 private:
-    int location(const std::string& name) const;
+    int Location(const std::string& name) const;
 
-    unsigned int program_ = 0;
-    mutable std::unordered_map<std::string, int> locations_;
+    unsigned int m_program = 0;
+    mutable std::unordered_map<std::string, int> m_locations;
 };

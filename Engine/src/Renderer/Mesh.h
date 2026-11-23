@@ -17,7 +17,7 @@ struct Vertex {
 
 enum class MeshUsage {
     Static,  // uploaded once, drawn many times
-    Dynamic  // updated often via setData (e.g. rebuilt tile chunks)
+    Dynamic  // updated often via SetData (e.g. rebuilt tile chunks)
 };
 
 class ENGINE_API Mesh {
@@ -34,22 +34,22 @@ public:
     Mesh& operator=(Mesh&& other) noexcept;
 
     // Unit quad from (0, 0) to (1, 1) with UVs covering the full texture.
-    static Mesh createQuad(const glm::vec4& color = glm::vec4(1.0f));
+    static Mesh CreateQuad(const glm::vec4& color = glm::vec4(1.0f));
 
-    void setData(const std::vector<Vertex>& vertices,
+    void SetData(const std::vector<Vertex>& vertices,
                  const std::vector<std::uint32_t>& indices = {});
-    void draw() const;
+    void Draw() const;
 
-    std::size_t vertexCount() const { return vertexCount_; }
-    std::size_t indexCount() const { return indexCount_; }
+    std::size_t VertexCount() const { return m_vertexCount; }
+    std::size_t IndexCount() const { return m_indexCount; }
 
 private:
-    void release();
+    void Release();
 
-    unsigned int vertexArray_ = 0;
-    unsigned int vertexBuffer_ = 0;
-    unsigned int indexBuffer_ = 0;
-    std::size_t vertexCount_ = 0;
-    std::size_t indexCount_ = 0;
-    MeshUsage usage_ = MeshUsage::Static;
+    unsigned int m_vertexArray = 0;
+    unsigned int m_vertexBuffer = 0;
+    unsigned int m_indexBuffer = 0;
+    std::size_t m_vertexCount = 0;
+    std::size_t m_indexCount = 0;
+    MeshUsage m_usage = MeshUsage::Static;
 };

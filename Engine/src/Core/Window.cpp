@@ -8,12 +8,12 @@
 #include <stdexcept>
 
 namespace {
-void errorCallback(int error, const char* description)
+void ErrorCallback(int error, const char* description)
 {
     std::cerr << "GLFW error " << error << ": " << description << '\n';
 }
 
-Window& owner(GLFWwindow* window)
+Window& Owner(GLFWwindow* window)
 {
     return *static_cast<Window*>(glfwGetWindowUserPointer(window));
 }
@@ -21,7 +21,7 @@ Window& owner(GLFWwindow* window)
 
 Window::Window(const WindowProps& props)
 {
-    glfwSetErrorCallback(errorCallback);
+    glfwSetErrorCallback(ErrorCallback);
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }
@@ -29,86 +29,86 @@ Window::Window(const WindowProps& props)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    window_ = glfwCreateWindow(props.width, props.height, props.title.c_str(), nullptr, nullptr);
-    if (!window_) {
+    m_window = glfwCreateWindow(props.width, props.height, props.title.c_str(), nullptr, nullptr);
+    if (!m_window) {
         glfwTerminate();
         throw std::runtime_error("Failed to create window");
     }
 
-    glfwMakeContextCurrent(window_);
+    glfwMakeContextCurrent(m_window);
     if (!gladLoadGL(glfwGetProcAddress)) {
-        glfwDestroyWindow(window_);
+        glfwDestroyWindow(m_window);
         glfwTerminate();
         throw std::runtime_error("Failed to load OpenGL functions");
     }
-    setVSync(props.vsync);
+    SetVSync(props.vsync);
 
-    glfwSetWindowUserPointer(window_, this);
-    glfwSetFramebufferSizeCallback(window_, [](GLFWwindow* window, int width, int height) {
-        Window& self = owner(window);
-        if (self.resizeCallback_) {
-            self.resizeCallback_(width, height);
+    glfwSetWindowUserPointer(m_window, this);
+    glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow* window, int width, int height) {
+        Window& self = Owner(window);
+        if (self.m_resizeCallback) {
+            self.m_resizeCallback(width, height);
         }
     });
-    glfwSetKeyCallback(window_, [](GLFWwindow* window, int key, int, int action, int) {
-        owner(window).input_.onKey(key, action != GLFW_RELEASE);
+    glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int, int action, int) {
+        Owner(window).m_input.OnKey(key, action != GLFW_RELEASE);
     });
-    glfwSetMouseButtonCallback(window_, [](GLFWwindow* window, int button, int action, int) {
-        owner(window).input_.onMouseButton(button, action != GLFW_RELEASE);
+    glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int) {
+        Owner(window).m_input.OnMouseButton(button, action != GLFW_RELEASE);
     });
-    glfwSetCursorPosCallback(window_, [](GLFWwindow* window, double x, double y) {
-        owner(window).input_.onMouseMove({static_cast<float>(x), static_cast<float>(y)});
+    glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y) {
+        Owner(window).m_input.OnMouseMove({static_cast<float>(x), static_cast<float>(y)});
     });
-    glfwSetScrollCallback(window_, [](GLFWwindow* window, double x, double y) {
-        owner(window).input_.onScroll({static_cast<float>(x), static_cast<float>(y)});
+    glfwSetScrollCallback(m_window, [](GLFWwindow* window, double x, double y) {
+        Owner(window).m_input.OnScroll({static_cast<float>(x), static_cast<float>(y)});
     });
 }
 
 Window::~Window()
 {
-    glfwDestroyWindow(window_);
+    glfwDestroyWindow(m_window);
     glfwTerminate();
 }
 
-bool Window::shouldClose() const
+bool Window::ShouldClose() const
 {
-    return glfwWindowShouldClose(window_) != 0;
+    return glfwWindowShouldClose(m_window) != 0;
 }
 
-void Window::close()
+void Window::Close()
 {
-    glfwSetWindowShouldClose(window_, GLFW_TRUE);
+    glfwSetWindowShouldClose(m_window, GLFW_TRUE);
 }
 
-void Window::pollEvents()
+void Window::PollEvents()
 {
-    input_.beginFrame();
+    m_input.BeginFrame();
     glfwPollEvents();
 }
 
-void Window::swapBuffers()
+void Window::SwapBuffers()
 {
-    glfwSwapBuffers(window_);
+    glfwSwapBuffers(m_window);
 }
 
-void Window::setVSync(bool enabled)
+void Window::SetVSync(bool enabled)
 {
     glfwSwapInterval(enabled ? 1 : 0);
 }
 
-void Window::setTitle(const std::string& title)
+void Window::SetTitle(const std::string& title)
 {
-    glfwSetWindowTitle(window_, title.c_str());
+    glfwSetWindowTitle(m_window, title.c_str());
 }
 
-glm::ivec2 Window::framebufferSize() const
+glm::ivec2 Window::FramebufferSize() const
 {
     glm::ivec2 size{0};
-    glfwGetFramebufferSize(window_, &size.x, &size.y);
+    glfwGetFramebufferSize(m_window, &size.x, &size.y);
     return size;
 }
 
-double Window::time() const
+double Window::Time() const
 {
     return glfwGetTime();
 }

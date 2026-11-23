@@ -1,27 +1,27 @@
 #include "Core/Application.h"
 
 Application::Application(const WindowProps& props)
-    : window_(props)
+    : m_window(props)
 {
-    const glm::ivec2 size = window_.framebufferSize();
-    renderer_.setViewport(size.x, size.y);
-    window_.setResizeCallback([this](int width, int height) {
-        renderer_.setViewport(width, height);
-        onResize(width, height);
+    const glm::ivec2 size = m_window.FramebufferSize();
+    m_renderer.SetViewport(size.x, size.y);
+    m_window.SetResizeCallback([this](int width, int height) {
+        m_renderer.SetViewport(width, height);
+        OnResize(width, height);
     });
 }
 
-void Application::run()
+void Application::Run()
 {
-    double lastTime = window_.time();
-    while (!window_.shouldClose()) {
-        const double now = window_.time();
+    double lastTime = m_window.Time();
+    while (!m_window.ShouldClose()) {
+        const double now = m_window.Time();
         const float deltaTime = static_cast<float>(now - lastTime);
         lastTime = now;
 
-        window_.pollEvents();
-        onUpdate(deltaTime);
-        onRender();
-        window_.swapBuffers();
+        m_window.PollEvents();
+        OnUpdate(deltaTime);
+        OnRender();
+        m_window.SwapBuffers();
     }
 }

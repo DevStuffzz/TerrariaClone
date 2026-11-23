@@ -7,11 +7,11 @@ public:
     TerrariaGame();
 
 protected:
-    void onUpdate(float deltaTime) override;
-    void onRender() override;
-    void onResize(int width, int height) override;
+    void OnUpdate(float deltaTime) override;
+    void OnRender() override;
+    void OnResize(int width, int height) override;
 
 private:
-    Camera2D camera_;
-    Mesh ground_;
+    Camera2D m_camera;
+    Mesh m_ground;
 };

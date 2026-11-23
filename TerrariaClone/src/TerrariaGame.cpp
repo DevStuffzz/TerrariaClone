@@ -1,7 +1,7 @@
 #include "TerrariaGame.h"
 
 namespace {
-Mesh createGround()
+Mesh CreateGround()
 {
     const glm::vec4 grass{0.3f, 0.7f, 0.3f, 1.0f};
     const glm::vec4 dirt{0.45f, 0.3f, 0.15f, 1.0f};
@@ -16,38 +16,38 @@ Mesh createGround()
 
 TerrariaGame::TerrariaGame()
     : Application({"TerrariaClone", 1280, 720, true}),
-      camera_(1.0f, 1.0f, 9.0f),
-      ground_(createGround())
+      m_camera(1.0f, 1.0f, 9.0f),
+      m_ground(CreateGround())
 {
-    const glm::ivec2 size = window().framebufferSize();
-    onResize(size.x, size.y);
+    const glm::ivec2 size = GetWindow().FramebufferSize();
+    OnResize(size.x, size.y);
 }
 
-void TerrariaGame::onUpdate(float deltaTime)
+void TerrariaGame::OnUpdate(float deltaTime)
 {
-    const Input& input = window().input();
-    if (input.isKeyPressed(Key::Escape)) {
-        window().close();
+    const Input& input = GetWindow().GetInput();
+    if (input.IsKeyPressed(Key::Escape)) {
+        GetWindow().Close();
     }
 
     glm::vec2 direction{0.0f};
-    if (input.isKeyDown(Key::A)) direction.x -= 1.0f;
-    if (input.isKeyDown(Key::D)) direction.x += 1.0f;
-    if (input.isKeyDown(Key::S)) direction.y -= 1.0f;
-    if (input.isKeyDown(Key::W)) direction.y += 1.0f;
-    camera_.move(direction * 5.0f * deltaTime);
+    if (input.IsKeyDown(Key::A)) direction.x -= 1.0f;
+    if (input.IsKeyDown(Key::D)) direction.x += 1.0f;
+    if (input.IsKeyDown(Key::S)) direction.y -= 1.0f;
+    if (input.IsKeyDown(Key::W)) direction.y += 1.0f;
+    m_camera.Move(direction * 5.0f * deltaTime);
 }
 
-void TerrariaGame::onRender()
+void TerrariaGame::OnRender()
 {
-    Renderer& renderer = this->renderer();
-    renderer.clear({0.1f, 0.15f, 0.2f, 1.0f});
-    renderer.beginScene(camera_);
-    renderer.draw(ground_);
-    renderer.drawQuad({-1.0f, -2.0f}, {1.0f, 2.0f}, {0.9f, 0.8f, 0.6f, 1.0f});
+    Renderer& renderer = GetRenderer();
+    renderer.Clear({0.1f, 0.15f, 0.2f, 1.0f});
+    renderer.BeginScene(m_camera);
+    renderer.Draw(m_ground);
+    renderer.DrawQuad({-1.0f, -2.0f}, {1.0f, 2.0f}, {0.9f, 0.8f, 0.6f, 1.0f});
 }
 
-void TerrariaGame::onResize(int width, int height)
+void TerrariaGame::OnResize(int width, int height)
 {
-    camera_.setViewportSize(static_cast<float>(width), static_cast<float>(height));
+    m_camera.SetViewportSize(static_cast<float>(width), static_cast<float>(height));
 }

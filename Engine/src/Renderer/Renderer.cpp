@@ -40,16 +40,16 @@ const unsigned char whitePixel[] = {255, 255, 255, 255};
 }
 
 Renderer::Renderer()
-    : shader_(vertexSource, fragmentSource),
-      whiteTexture_(1, 1, whitePixel),
-      quad_(Mesh::createQuad())
+    : m_shader(vertexSource, fragmentSource),
+      m_whiteTexture(1, 1, whitePixel),
+      m_quad(Mesh::CreateQuad())
 {
-    shader_.setInt("uTexture", 0);
+    m_shader.SetInt("uTexture", 0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Renderer::setViewport(int width, int height) const
+void Renderer::SetViewport(int width, int height) const
 {
     if (width < 0 || height < 0) {
         throw std::invalid_argument("Viewport dimensions cannot be negative");
@@ -57,50 +57,50 @@ void Renderer::setViewport(int width, int height) const
     glViewport(0, 0, width, height);
 }
 
-void Renderer::clear(const glm::vec4& color) const
+void Renderer::Clear(const glm::vec4& color) const
 {
     glClearColor(color.r, color.g, color.b, color.a);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Renderer::beginScene(const Camera2D& camera)
+void Renderer::BeginScene(const Camera2D& camera)
 {
-    viewProjection_ = camera.viewProjection();
+    m_viewProjection = camera.ViewProjection();
 }
 
-void Renderer::setViewProjection(const glm::mat4& viewProjection)
+void Renderer::SetViewProjection(const glm::mat4& viewProjection)
 {
-    viewProjection_ = viewProjection;
+    m_viewProjection = viewProjection;
 }
 
-void Renderer::draw(const Mesh& mesh, const glm::mat4& transform, const Texture* texture,
+void Renderer::Draw(const Mesh& mesh, const glm::mat4& transform, const Texture* texture,
                     const glm::vec4& tint) const
 {
-    shader_.setVec4("uTint", tint);
-    (texture ? *texture : whiteTexture_).bind(0);
-    draw(mesh, shader_, transform);
+    m_shader.SetVec4("uTint", tint);
+    (texture ? *texture : m_whiteTexture).Bind(0);
+    Draw(mesh, m_shader, transform);
 }
 
-void Renderer::draw(const Mesh& mesh, const Shader& shader, const glm::mat4& transform) const
+void Renderer::Draw(const Mesh& mesh, const Shader& shader, const glm::mat4& transform) const
 {
-    shader.setMat4("uViewProjection", viewProjection_);
-    shader.setMat4("uTransform", transform);
-    mesh.draw();
+    shader.SetMat4("uViewProjection", m_viewProjection);
+    shader.SetMat4("uTransform", transform);
+    mesh.Draw();
 }
 
-void Renderer::drawQuad(const glm::vec2& position, const glm::vec2& size,
+void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size,
                         const glm::vec4& color) const
 {
-    draw(quad_, transform(position, size), nullptr, color);
+    Draw(m_quad, Transform(position, size), nullptr, color);
 }
 
-void Renderer::drawQuad(const glm::vec2& position, const glm::vec2& size,
+void Renderer::DrawQuad(const glm::vec2& position, const glm::vec2& size,
                         const Texture& texture, const glm::vec4& tint) const
 {
-    draw(quad_, transform(position, size), &texture, tint);
+    Draw(m_quad, Transform(position, size), &texture, tint);
 }
 
-glm::mat4 Renderer::transform(const glm::vec2& position, const glm::vec2& size, float rotation)
+glm::mat4 Renderer::Transform(const glm::vec2& position, const glm::vec2& size, float rotation)
 {
     glm::mat4 result = glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f));
     if (rotation != 0.0f) {

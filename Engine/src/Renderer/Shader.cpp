@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace {
-std::string shaderLog(unsigned int shader)
+std::string ShaderLog(unsigned int shader)
 {
     int length = 0;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
@@ -17,7 +17,7 @@ std::string shaderLog(unsigned int shader)
     return log.data();
 }
 
-std::string programLog(unsigned int program)
+std::string ProgramLog(unsigned int program)
 {
     int length = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
@@ -26,7 +26,7 @@ std::string programLog(unsigned int program)
     return log.data();
 }
 
-unsigned int compileShader(unsigned int type, const char* source)
+unsigned int CompileShader(unsigned int type, const char* source)
 {
     const unsigned int shader = glCreateShader(type);
     if (!shader) {
@@ -38,7 +38,7 @@ unsigned int compileShader(unsigned int type, const char* source)
     int success = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        const std::string log = shaderLog(shader);
+        const std::string log = ShaderLog(shader);
         glDeleteShader(shader);
         throw std::runtime_error("Failed to compile OpenGL shader: " + log);
     }
@@ -48,106 +48,106 @@ unsigned int compileShader(unsigned int type, const char* source)
 
 Shader::Shader(const char* vertexSource, const char* fragmentSource)
 {
-    const unsigned int vertex = compileShader(GL_VERTEX_SHADER, vertexSource);
+    const unsigned int vertex = CompileShader(GL_VERTEX_SHADER, vertexSource);
     unsigned int fragment = 0;
     try {
-        fragment = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
+        fragment = CompileShader(GL_FRAGMENT_SHADER, fragmentSource);
     } catch (const std::runtime_error&) {
         glDeleteShader(vertex);
         throw;
     }
 
-    program_ = glCreateProgram();
-    if (!program_) {
+    m_program = glCreateProgram();
+    if (!m_program) {
         glDeleteShader(vertex);
         glDeleteShader(fragment);
         throw std::runtime_error("Failed to create OpenGL program");
     }
 
-    glAttachShader(program_, vertex);
-    glAttachShader(program_, fragment);
-    glLinkProgram(program_);
+    glAttachShader(m_program, vertex);
+    glAttachShader(m_program, fragment);
+    glLinkProgram(m_program);
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 
     int success = 0;
-    glGetProgramiv(program_, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_program, GL_LINK_STATUS, &success);
     if (!success) {
-        const std::string log = programLog(program_);
-        glDeleteProgram(program_);
+        const std::string log = ProgramLog(m_program);
+        glDeleteProgram(m_program);
         throw std::runtime_error("Failed to link OpenGL program: " + log);
     }
 }
 
 Shader::~Shader()
 {
-    glDeleteProgram(program_);
+    glDeleteProgram(m_program);
 }
 
 Shader::Shader(Shader&& other) noexcept
-    : program_(std::exchange(other.program_, 0)),
-      locations_(std::move(other.locations_))
+    : m_program(std::exchange(other.m_program, 0)),
+      m_locations(std::move(other.m_locations))
 {
 }
 
 Shader& Shader::operator=(Shader&& other) noexcept
 {
     if (this != &other) {
-        glDeleteProgram(program_);
-        program_ = std::exchange(other.program_, 0);
-        locations_ = std::move(other.locations_);
+        glDeleteProgram(m_program);
+        m_program = std::exchange(other.m_program, 0);
+        m_locations = std::move(other.m_locations);
     }
     return *this;
 }
 
-void Shader::bind() const
+void Shader::Bind() const
 {
-    glUseProgram(program_);
+    glUseProgram(m_program);
 }
 
-int Shader::location(const std::string& name) const
+int Shader::Location(const std::string& name) const
 {
-    const auto found = locations_.find(name);
-    if (found != locations_.end()) {
+    const auto found = m_locations.find(name);
+    if (found != m_locations.end()) {
         return found->second;
     }
-    const int result = glGetUniformLocation(program_, name.c_str());
-    locations_.emplace(name, result);
+    const int result = glGetUniformLocation(m_program, name.c_str());
+    m_locations.emplace(name, result);
     return result;
 }
 
-void Shader::setInt(const std::string& name, int value) const
+void Shader::SetInt(const std::string& name, int value) const
 {
-    bind();
-    glUniform1i(location(name), value);
+    Bind();
+    glUniform1i(Location(name), value);
 }
 
-void Shader::setFloat(const std::string& name, float value) const
+void Shader::SetFloat(const std::string& name, float value) const
 {
-    bind();
-    glUniform1f(location(name), value);
+    Bind();
+    glUniform1f(Location(name), value);
 }
 
-void Shader::setVec2(const std::string& name, const glm::vec2& value) const
+void Shader::SetVec2(const std::string& name, const glm::vec2& value) const
 {
-    bind();
-    glUniform2fv(location(name), 1, glm::value_ptr(value));
+    Bind();
+    glUniform2fv(Location(name), 1, glm::value_ptr(value));
 }
 
-void Shader::setVec3(const std::string& name, const glm::vec3& value) const
+void Shader::SetVec3(const std::string& name, const glm::vec3& value) const
 {
-    bind();
-    glUniform3fv(location(name), 1, glm::value_ptr(value));
+    Bind();
+    glUniform3fv(Location(name), 1, glm::value_ptr(value));
 }
 
-void Shader::setVec4(const std::string& name, const glm::vec4& value) const
+void Shader::SetVec4(const std::string& name, const glm::vec4& value) const
 {
-    bind();
-    glUniform4fv(location(name), 1, glm::value_ptr(value));
+    Bind();
+    glUniform4fv(Location(name), 1, glm::value_ptr(value));
 }
 
-void Shader::setMat4(const std::string& name, const glm::mat4& value) const
+void Shader::SetMat4(const std::string& name, const glm::mat4& value) const
 {
-    bind();
-    glUniformMatrix4fv(location(name), 1, GL_FALSE, glm::value_ptr(value));
+    Bind();
+    glUniformMatrix4fv(Location(name), 1, GL_FALSE, glm::value_ptr(value));
 }

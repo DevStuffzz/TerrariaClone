@@ -32,35 +32,35 @@ enum class MouseButton : int {
 class ENGINE_API Input {
 public:
     // Held down right now.
-    bool isKeyDown(Key key) const;
+    bool IsKeyDown(Key key) const;
     // Went down / up since the previous frame.
-    bool isKeyPressed(Key key) const;
-    bool isKeyReleased(Key key) const;
+    bool IsKeyPressed(Key key) const;
+    bool IsKeyReleased(Key key) const;
 
-    bool isMouseButtonDown(MouseButton button) const;
-    bool isMouseButtonPressed(MouseButton button) const;
-    bool isMouseButtonReleased(MouseButton button) const;
+    bool IsMouseButtonDown(MouseButton button) const;
+    bool IsMouseButtonPressed(MouseButton button) const;
+    bool IsMouseButtonReleased(MouseButton button) const;
 
     // Window pixel coordinates, origin top-left.
-    const glm::vec2& mousePosition() const { return mousePosition_; }
+    const glm::vec2& MousePosition() const { return m_mousePosition; }
     // Scroll accumulated since the previous frame.
-    const glm::vec2& scrollDelta() const { return scrollDelta_; }
+    const glm::vec2& ScrollDelta() const { return m_scrollDelta; }
 
-    // Called by Window: beginFrame before polling events, the rest from event callbacks.
-    void beginFrame();
-    void onKey(int key, bool down);
-    void onMouseButton(int button, bool down);
-    void onMouseMove(const glm::vec2& position);
-    void onScroll(const glm::vec2& offset);
+    // Called by Window: BeginFrame before polling events, the rest from event callbacks.
+    void BeginFrame();
+    void OnKey(int key, bool down);
+    void OnMouseButton(int button, bool down);
+    void OnMouseMove(const glm::vec2& position);
+    void OnScroll(const glm::vec2& offset);
 
 private:
-    static constexpr int keyCount = 349;
-    static constexpr int mouseButtonCount = 8;
+    static constexpr int s_keyCount = 349;
+    static constexpr int s_mouseButtonCount = 8;
 
-    std::array<bool, keyCount> keys_{};
-    std::array<bool, keyCount> previousKeys_{};
-    std::array<bool, mouseButtonCount> buttons_{};
-    std::array<bool, mouseButtonCount> previousButtons_{};
-    glm::vec2 mousePosition_{0.0f};
-    glm::vec2 scrollDelta_{0.0f};
+    std::array<bool, s_keyCount> m_keys{};
+    std::array<bool, s_keyCount> m_previousKeys{};
+    std::array<bool, s_mouseButtonCount> m_buttons{};
+    std::array<bool, s_mouseButtonCount> m_previousButtons{};
+    glm::vec2 m_mousePosition{0.0f};
+    glm::vec2 m_scrollDelta{0.0f};
 };

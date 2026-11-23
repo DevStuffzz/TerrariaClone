@@ -9,7 +9,7 @@ int main()
     int result = 0;
     try {
         app = new TerrariaGame();
-        app->run();
+        app->Run();
     } catch (const std::exception& error) {
         std::cerr << "Fatal error: " << error.what() << '\n';
         result = 1;

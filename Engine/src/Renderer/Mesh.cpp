@@ -8,20 +8,20 @@
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices,
            MeshUsage usage)
-    : usage_(usage)
+    : m_usage(usage)
 {
-    glGenVertexArrays(1, &vertexArray_);
-    glGenBuffers(1, &vertexBuffer_);
-    glGenBuffers(1, &indexBuffer_);
-    if (!vertexArray_ || !vertexBuffer_ || !indexBuffer_) {
-        release();
+    glGenVertexArrays(1, &m_vertexArray);
+    glGenBuffers(1, &m_vertexBuffer);
+    glGenBuffers(1, &m_indexBuffer);
+    if (!m_vertexArray || !m_vertexBuffer || !m_indexBuffer) {
+        Release();
         throw std::runtime_error("Failed to create mesh buffers");
     }
 
-    glBindVertexArray(vertexArray_);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
+    glBindVertexArray(m_vertexArray);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
     // The element buffer binding is stored in the VAO, so bind it while the VAO is bound.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
 
     const auto stride = static_cast<GLsizei>(sizeof(Vertex));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride,
@@ -37,51 +37,51 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<std::uint32_t>
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     try {
-        setData(vertices, indices);
+        SetData(vertices, indices);
     } catch (...) {
-        release();
+        Release();
         throw;
     }
 }
 
 Mesh::~Mesh()
 {
-    release();
+    Release();
 }
 
-void Mesh::release()
+void Mesh::Release()
 {
-    glDeleteBuffers(1, &indexBuffer_);
-    glDeleteBuffers(1, &vertexBuffer_);
-    glDeleteVertexArrays(1, &vertexArray_);
-    indexBuffer_ = vertexBuffer_ = vertexArray_ = 0;
+    glDeleteBuffers(1, &m_indexBuffer);
+    glDeleteBuffers(1, &m_vertexBuffer);
+    glDeleteVertexArrays(1, &m_vertexArray);
+    m_indexBuffer = m_vertexBuffer = m_vertexArray = 0;
 }
 
 Mesh::Mesh(Mesh&& other) noexcept
-    : vertexArray_(std::exchange(other.vertexArray_, 0)),
-      vertexBuffer_(std::exchange(other.vertexBuffer_, 0)),
-      indexBuffer_(std::exchange(other.indexBuffer_, 0)),
-      vertexCount_(std::exchange(other.vertexCount_, 0)),
-      indexCount_(std::exchange(other.indexCount_, 0)),
-      usage_(other.usage_)
+    : m_vertexArray(std::exchange(other.m_vertexArray, 0)),
+      m_vertexBuffer(std::exchange(other.m_vertexBuffer, 0)),
+      m_indexBuffer(std::exchange(other.m_indexBuffer, 0)),
+      m_vertexCount(std::exchange(other.m_vertexCount, 0)),
+      m_indexCount(std::exchange(other.m_indexCount, 0)),
+      m_usage(other.m_usage)
 {
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept
 {
     if (this != &other) {
-        release();
-        vertexArray_ = std::exchange(other.vertexArray_, 0);
-        vertexBuffer_ = std::exchange(other.vertexBuffer_, 0);
-        indexBuffer_ = std::exchange(other.indexBuffer_, 0);
-        vertexCount_ = std::exchange(other.vertexCount_, 0);
-        indexCount_ = std::exchange(other.indexCount_, 0);
-        usage_ = other.usage_;
+        Release();
+        m_vertexArray = std::exchange(other.m_vertexArray, 0);
+        m_vertexBuffer = std::exchange(other.m_vertexBuffer, 0);
+        m_indexBuffer = std::exchange(other.m_indexBuffer, 0);
+        m_vertexCount = std::exchange(other.m_vertexCount, 0);
+        m_indexCount = std::exchange(other.m_indexCount, 0);
+        m_usage = other.m_usage;
     }
     return *this;
 }
 
-Mesh Mesh::createQuad(const glm::vec4& color)
+Mesh Mesh::CreateQuad(const glm::vec4& color)
 {
     const std::vector<Vertex> vertices = {
         {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, color},
@@ -92,7 +92,7 @@ Mesh Mesh::createQuad(const glm::vec4& color)
     return Mesh(vertices, {0, 1, 2, 2, 3, 0});
 }
 
-void Mesh::setData(const std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices)
+void Mesh::SetData(const std::vector<Vertex>& vertices, const std::vector<std::uint32_t>& indices)
 {
     for (const std::uint32_t index : indices) {
         if (index >= vertices.size()) {
@@ -100,9 +100,9 @@ void Mesh::setData(const std::vector<Vertex>& vertices, const std::vector<std::u
         }
     }
 
-    const GLenum glUsage = usage_ == MeshUsage::Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-    glBindVertexArray(vertexArray_);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
+    const GLenum glUsage = m_usage == MeshUsage::Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+    glBindVertexArray(m_vertexArray);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertices.size() * sizeof(Vertex)),
                  vertices.data(), glUsage);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -111,20 +111,20 @@ void Mesh::setData(const std::vector<Vertex>& vertices, const std::vector<std::u
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    vertexCount_ = vertices.size();
-    indexCount_ = indices.size();
+    m_vertexCount = vertices.size();
+    m_indexCount = indices.size();
 }
 
-void Mesh::draw() const
+void Mesh::Draw() const
 {
-    if (vertexCount_ == 0) {
+    if (m_vertexCount == 0) {
         return;
     }
-    glBindVertexArray(vertexArray_);
-    if (indexCount_ > 0) {
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indexCount_), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(m_vertexArray);
+    if (m_indexCount > 0) {
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indexCount), GL_UNSIGNED_INT, nullptr);
     } else {
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount_));
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_vertexCount));
     }
     glBindVertexArray(0);
 }

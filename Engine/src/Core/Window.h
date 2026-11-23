@@ -32,25 +32,25 @@ public:
     Window(const Window&) = delete;
     Window& operator=(const Window&) = delete;
 
-    bool shouldClose() const;
-    void close();
+    bool ShouldClose() const;
+    void Close();
     // Updates input state; call once per frame before reading Input.
-    void pollEvents();
-    void swapBuffers();
-    void setVSync(bool enabled);
-    void setTitle(const std::string& title);
+    void PollEvents();
+    void SwapBuffers();
+    void SetVSync(bool enabled);
+    void SetTitle(const std::string& title);
 
-    glm::ivec2 framebufferSize() const;
+    glm::ivec2 FramebufferSize() const;
     // Seconds since the window was created.
-    double time() const;
+    double Time() const;
 
     // Called with the new framebuffer size in pixels.
-    void setResizeCallback(ResizeCallback callback) { resizeCallback_ = std::move(callback); }
+    void SetResizeCallback(ResizeCallback callback) { m_resizeCallback = std::move(callback); }
 
-    const Input& input() const { return input_; }
+    const Input& GetInput() const { return m_input; }
 
 private:
-    GLFWwindow* window_ = nullptr;
-    Input input_;
-    ResizeCallback resizeCallback_;
+    GLFWwindow* m_window = nullptr;
+    Input m_input;
+    ResizeCallback m_resizeCallback;
 };
